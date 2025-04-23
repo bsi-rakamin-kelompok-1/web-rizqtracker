@@ -17,11 +17,15 @@ import Image from "next/image";
 import Logo from "@/assets/Logo.png";
 import { useState } from "react";
 import { PasswordInput } from "./PasswordInput";
+import { dataStore } from "@/store/DataStore";
 
 const Login = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
+
+  const data = dataStore(state => state.data);
+  console.log("INI DATA: ", data);
 
   return (
     <div className="min-h-screen w-full bg-green bg-[url(@/assets/LoginWallpaper.png)] bg-cover bg-center bg-no-repeat flex items-center justify-center">
