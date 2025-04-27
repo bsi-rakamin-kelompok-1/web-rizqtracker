@@ -18,14 +18,12 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
-import { dataStore } from "@/store/DataStore";
+import { PasswordInput } from "./PasswordInput";
 
 const Register = () => {
   const[isLoading, setIsLoading] = useState<boolean>(false);
 
   const router = useRouter();
-
-  const setData = dataStore(state => state.setData);
 
   const[formData, setFormData] = useState({
     full_name: "",
@@ -48,30 +46,53 @@ const Register = () => {
     try {
       setIsLoading(true);
       const res = await axios.post("https://kelompok1.serverku.org/v1/auth/register", formData);
-      console.log("Registered:", res.data);
-      console.log("INI RES.DATA.DATA: ", res.data.data);
 
       toast.success("Akun berhasil didaftarkan.");
-
-      setData(res.data.data);
+      
       router.push("/auth/login");
     } catch (err: any) {
       setIsLoading(false);
 
       const errorData = err.response?.data;
 
-      if(errorData?.message) {
-        const errorMsg = errorData.message;
+      if(errorData?.errors && Array.isArray(errorData?.errors)) {
+        const fieldErrors: Partial<typeof formData> = {};
 
-        if (errorMsg.includes("Password and confirm password")) {
-          setErrors({ confirm_password: errorMsg });
-        } else if (errorMsg.includes("Email")) {
-          setErrors({ email: errorMsg });
-        } else if (errorMsg.includes("Phone number")) {
-          setErrors({ phone_number: errorMsg });
-        } else {
-          toast.error(errorMsg); // fallback
+        for (const error of errorData.errors) {
+          const lowerError = error.toLowerCase();
+
+          if(lowerError.includes("full name")) {
+            fieldErrors.full_name = error;
+          }
+          else if (lowerError.includes("phone number")) {
+            fieldErrors.phone_number = fieldErrors.phone_number
+            ? `${fieldErrors.phone_number}, ${error}`
+            : error;
+          }
+          else if (lowerError.includes("email")) {
+            fieldErrors.email = fieldErrors.email
+            ? `${fieldErrors.email}, ${error}`
+            : error;
+          }
+          else if (lowerError.includes("symbol") || lowerError.includes("password length") || lowerError.includes("uppercase")) {
+            fieldErrors.password = fieldErrors.password
+            ? `${fieldErrors.password}, ${error}`
+            : error;
+          }
+          else if (lowerError.includes("password and confirm") || lowerError.includes("confirm password")) {
+            fieldErrors.confirm_password = fieldErrors.confirm_password
+            ? `${fieldErrors.confirm_password}, ${error}`
+            : error;
+          } 
+
+          setErrors(fieldErrors);
         }
+      }
+      else if (errorData?.message) {
+        toast.error(errorData.message);
+      } 
+      else {
+        toast.error("Something went wrong!");
       }
 
       console.error("Registration error:", errorData || err.message);
@@ -106,11 +127,26 @@ const Register = () => {
                 {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
               </div>
               <div className="flex flex-col space-y-1.5">
-                <Input id="password" placeholder="Password" onChange={handleChange} value={formData.password} />
+                {/* <Input id="password" placeholder="Password" onChange={handleChange} value={formData.password} /> */}
+                <PasswordInput
+                  id="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  autoComplete="new-password"
+                  placeholder="Password"
+                />
+                {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
               </div>
               <div className="flex flex-col space-y-1.5">
-                <Input id="confirm_password" placeholder="Confirm Password" onChange={handleChange} value={formData.confirm_password} />
-                {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
+                {/* <Input id="confirm_password" placeholder="Confirm Password" onChange={handleChange} value={formData.confirm_password} /> */}
+                <PasswordInput
+                  id="confirm_password"
+                  value={formData.confirm_password}
+                  onChange={handleChange}
+                  autoComplete="new-password"
+                  placeholder="Confirmation Password"
+                />
+                {errors.confirm_password && <p className="text-sm text-red-500">{errors.confirm_password}</p>}
               </div>
               <div className="flex justify-center">
                 <Button type="submit" variant="green" disabled={isLoading}>Register</Button>

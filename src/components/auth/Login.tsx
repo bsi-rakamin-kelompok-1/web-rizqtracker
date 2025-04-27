@@ -17,15 +17,42 @@ import Image from "next/image";
 import Logo from "@/assets/Logo.png";
 import { useState } from "react";
 import { PasswordInput } from "./PasswordInput";
-import { dataStore } from "@/store/DataStore";
+import { useAuthDataStore } from "@/store/AuthDataStore";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const Login = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
 
-  const data = dataStore(state => state.data);
-  console.log("INI DATA: ", data);
+  const router = useRouter();
+  const authStore = useAuthDataStore();
+
+  const[formData, setFormData] = useState({
+    email: "",
+    password: ""
+  })
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const res = await axios.post("https://kelompok1.serverku.org/v1/auth/login", formData);
+
+      authStore.setToken(res.data.token);
+
+      router.push("/dashboard")
+    } catch (err: any) {
+      const errorData = err.response?.data;
+
+      console.error("Registration error:", errorData || err.message);
+    }
+  }
 
   return (
     <div className="min-h-screen w-full bg-green bg-[url(@/assets/LoginWallpaper.png)] bg-cover bg-center bg-no-repeat flex items-center justify-center">
@@ -48,27 +75,27 @@ const Login = () => {
           </div>
           <Card className="p-10">
             <CardContent>
-              <form>
+              <form onSubmit={handleLogin}>
                 <div className="grid w-full items-center gap-4">
                   <div className="flex flex-col space-y-1.5">
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" placeholder="" />
+                    <Input id="email" placeholder="" onChange={handleChange} value={formData.email} />
                   </div>
                   <div className="flex flex-col space-y-1.5">
                   <Label htmlFor="password">Password</Label>
                     <PasswordInput
                       id="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      value={formData.password}
+                      onChange={handleChange}
                       autoComplete="new-password"
                     />
+                  </div>
+                  <div className="flex justify-center">
+                    <Button variant="green">Masuk</Button>
                   </div>
                 </div>
               </form>
             </CardContent>
-            <CardFooter className="flex justify-center">
-              <Button variant="green">Masuk</Button>
-            </CardFooter>
             <p className="flex justify-center text-sm text-muted-foreground">
               Belum punya akun? Registrasi
               <Link
