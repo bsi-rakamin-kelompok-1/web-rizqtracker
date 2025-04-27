@@ -2,9 +2,28 @@
 import { useState } from "react";
 import Image from "next/image";
 import walledLogo from "@/assets/Logo.png";
+import { useAuthDataStore } from "@/store/AuthDataStore";
+import { useUserStore } from "@/store/UserStore";
+import { useRouter } from "next/navigation";
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const token = useAuthDataStore((state) => state.token);
+  const userStore = useUserStore();
+  const router = useRouter();
+
+  const handleDashboardClick = () => {
+    router.push('/dashboard');
+  };
+  const handleTransferClick = () => {
+    router.push('/transactions/transfer');
+  };
+  const handleTopupClick = () => {
+    router.push('/transactions/topup');
+  };
+  const handleProfileClick = () => {
+    router.push('/profile');
+  };
 
   return (
     <header className="bg-[#32BAA3]">
@@ -28,6 +47,7 @@ function Navbar() {
                   <a
                     className="text-white transition hover:text-gray-500/75"
                     href="#"
+                    onClick={handleDashboardClick}
                   >
                     Dashboard
                   </a>
@@ -36,6 +56,7 @@ function Navbar() {
                   <a
                     className="text-white transition hover:text-gray-500/75"
                     href="#"
+                    onClick={handleTransferClick}
                   >
                     Transfer
                   </a>
@@ -44,6 +65,7 @@ function Navbar() {
                   <a
                     className="text-white transition hover:text-gray-500/75"
                     href="#"
+                    onClick={handleTopupClick}
                   >
                     Topup
                   </a>
@@ -59,16 +81,16 @@ function Navbar() {
               </ul>
             </nav>
 
-            {/* Profile Dropdown */}
+            
             <div className="hidden md:relative md:block">
               <button
                 type="button"
-                className="overflow-hidden rounded-full border border-gray-300 shadow-inner"
+                className="overflow-hidden cursor-pointer rounded-full border border-gray-300 shadow-inner"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
                 <span className="sr-only">Toggle dashboard menu</span>
                 <img
-                  src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                  src={userStore.avatar_url ?? "@/assets/Logo.png"}
                   alt=""
                   className="size-10 object-cover"
                 />
@@ -79,9 +101,9 @@ function Navbar() {
                   className="absolute end-0 z-10 mt-2 w-56 divide-y divide-gray-100 rounded-md border border-gray-100 bg-white shadow-lg"
                   role="menu"
                 >
-                  <div className="p-2">
+                  <div className="p-2 cursor-pointer">
                     <a
-                      href="#"
+                      onClick={handleProfileClick}
                       className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700"
                       role="menuitem"
                     >
@@ -117,7 +139,7 @@ function Navbar() {
               )}
             </div>
 
-            {/* Burger button for mobile */}
+            {/* INI TOMBOL KRABBY PATTY */}
             <div className="block md:hidden">
               <button className="rounded-sm bg-gray-100 p-2 text-gray-600 transition hover:text-gray-600/75">
                 <svg
