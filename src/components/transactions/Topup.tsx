@@ -35,7 +35,7 @@ const Topup = () => {
     topup_method: "",
     amount: "",
     notes: "",
-    pin: "",
+    pin: "222222",
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

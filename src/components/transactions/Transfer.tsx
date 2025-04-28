@@ -45,6 +45,21 @@ const Transfer = () => {
   setData(dummyUsers);
   const token = useAuthDataStore((state) => state.token);
   const userStore = useUserStore();
+  const [accountNumber, setAccountNumber] = useState("");
+  const [accountExists, setAccountExists] = useState<boolean | null>(null);
+  const [error, setError] = useState("");
+
+  const [formData, setFormData] = useState({
+    recipient_account_number: "",
+    transfer_category: "",
+    amount: "",
+    pin: "",
+    notes: "",
+  });
+
+  const handleInputChange = (event) => {
+    setAccountNumber(event.target.value);
+  };
 
   const getUserDetail = async () => {
     try {
@@ -62,15 +77,37 @@ const Transfer = () => {
       console.error("Error: ", error);
     }
   };
+
+  const checkAccount = async () => {
+    setError("");
+    setAccountExists(null); 
+    try {
+      const resp = await axios.get(
+        `https://kelompok1.serverku.org/v1/accounts/${accountNumber}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      //   userStore.setUser(resp.data.data);
+      if (resp.status >= 200 && resp.status < 300) {
+        setAccountExists(true);
+      }
+    } catch (error) {
+      console.error("Error: ", error);
+    }
+  };
   useEffect(() => {
     getUserDetail();
+    checkAccount();
   }, []);
 
   return (
     <>
       <Navbar />
       <div className=" bg-gradient-to-b min-h-screen from-[#32BAA3] to-[#FFFFFF]">
-
         <div className="flex justify-center p-5">
           <Card className="w-full max-w-md">
             <CardContent className="p-5 space-y-3">
@@ -84,30 +121,43 @@ const Transfer = () => {
                 <div className="flex gap-7 ">
                   <Input
                     placeholder="Masukkan rekening penerima"
-                    // value={recipient}
-                    // onChange={(e) => setRecipient(e.target.value)}
+                    type="text"
+                    id="accountNumber"
+                    value={accountNumber}
+                    onChange={handleInputChange}
                   />
                   <Button
                     variant="outline"
-                    className="text-xs text-white w-fit bg-[#FFC107]"
+                    className="cursor-pointer text-xs text-white w-fit bg-[#FFC107]"
+                    onClick={checkAccount}
                   >
                     Cek
                   </Button>
                 </div>
+                {accountExists === true && (
+                  <p className="text-green-500">Akun ditemukan.</p>
+                )}
+                {accountExists === false && (
+                  <p className="text-red-500">Akun tidak ditemukan.</p>
+                )}
+                {error && <p className="text-orange-500">{error}</p>}
               </div>
 
               <div className="space-y-1">
                 <Label>Nominal</Label>
-                <Input
-                  type="text"
-                  placeholder="Isi Nominal"
-                  className=""
-                  // value={amount}
-                  // onChange={(e) => setAmount(e.target.value)}
-                />
+                <div className="flex flex-col">
+                  <Input
+                    type="text"
+                    placeholder="Isi Nominal"
+                    className="w-full"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Saldo: {userStore.account.balance}
+                  </p>
+                </div>
                 <div className="">
                   <Select>
-                    <SelectTrigger className="mt-2 w-[12rem]">
+                    <SelectTrigger className="mt-2 w-full">
                       <SelectValue placeholder="Pilih kategori transfer" />
                     </SelectTrigger>
                     <SelectContent>
@@ -125,14 +175,10 @@ const Transfer = () => {
 
               <div className="space-y-1">
                 <Label>Catatan</Label>
-                <Input
-                  placeholder="Catatan.."
-                  // value={note}
-                  // onChange={(e) => setNote(e.target.value)}
-                />
+                <Input placeholder="Catatan.." />
               </div>
               <div className="flex justify-center">
-                <Button className="w-2xs mt-4 bg-[#32BAA3]  ">
+                <Button className="w-2xs mt-4 bg-[#32BAA3]">
                   <Link
                     href="/transactions/receipt"
                     className="hover: font-bold text-brand text-sm ml-1"

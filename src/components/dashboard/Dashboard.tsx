@@ -132,6 +132,9 @@ const Dashboard = () => {
   const handleTopupClick = () => {
     router.push('/transactions/topup');
   };
+  const handleCashflowIncomeTopupClick = () => {
+    router.push('/cashflow/income');
+  };
 
   useEffect(() => {
     getUserDetail();
@@ -344,7 +347,7 @@ const Dashboard = () => {
                     <div className="p-3 pl-4">
                       {activeTrxTab === "income" ? (
                         <>
-                          <div className="py-1 font-semibold text-gray-900">
+                          <div className="cursor-pointer py-1 font-semibold text-gray-900" onClick={handleCashflowIncomeTopupClick}>
                             Top Up
                           </div>
                           <div className="py-1 font-semibold text-gray-900">
