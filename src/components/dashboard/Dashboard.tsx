@@ -24,6 +24,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert";
 import { useAuthDataStore } from "@/store/AuthDataStore";
 import { useUserStore } from "@/store/UserStore";
 import { useCashflowSummaryStore } from "@/store/CashflowSummaryStore";
+import { useAllTransactionsStore } from "@/store/AllTransactionsStore";
 import {
   Table,
   TableBody,
@@ -49,6 +50,7 @@ const Dashboard = () => {
   const router = useRouter();
   const userStore = useUserStore();
   const cashflowSummaryStore = useCashflowSummaryStore();
+  const allTransactionsStore = useAllTransactionsStore();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -69,6 +71,16 @@ const Dashboard = () => {
       catatan: "Tagihan 1401",
       nominal: "Rp.500.000,00",
     },
+    {
+      id: 2,
+      date: "20-02-2024",
+      type: "Top Up",
+      kategori: "Kartu Kredit",
+      dari: "",
+      untuk: "Rihlan",
+      catatan: "Source Found",
+      nominal: "Rp.100.000,00",
+    }
   ];
 
   const getUserDetail = async () => {
@@ -111,19 +123,59 @@ const Dashboard = () => {
     }
   };
 
-  const filteredTransactions = transactions.filter((item) =>
+  const getAllTransactions = async () => {
+    try {
+      const resp = await axios.get(
+        "https://kelompok1.serverku.org/v1/transactions",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+
+      allTransactionsStore.setAllTransactions({
+        meta: resp.data.meta,
+        data: {
+          transactions: resp.data.data
+        }
+      })
+
+      console.log("INI DATA: ", resp.data.data);
+    } catch (error) {
+      console.error("Error: ", error);
+    }
+  }
+
+  function formatDate(dateStr: string): string {
+    const date = new Date(dateStr);
+    
+    if (isNaN(date.getTime())) {
+      return dateStr;
+    }
+    
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const day = date.getDate();
+    
+    const monthNames = [
+      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+      "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    ];
+    const month = monthNames[date.getMonth()];
+    
+    const year = date.getFullYear();
+  
+    return `${hours}.${minutes} - ${day} ${month} ${year}`;
+  }
+
+  const filteredTransactions = allTransactionsStore.data.transactions.filter((item) =>
     Object.values(item).some((val) =>
-      val.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      val?.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentTransactions = filteredTransactions.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
-  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredTransactions.length / allTransactionsStore.meta.size);
 
 
   const handleTransferClick = () => {
@@ -139,6 +191,7 @@ const Dashboard = () => {
   useEffect(() => {
     getUserDetail();
     getCashflowSummary();
+    getAllTransactions();
   }, []);
 
   useEffect(() => {
@@ -285,9 +338,12 @@ const Dashboard = () => {
                       stroke="#FFC107"
                       strokeWidth="15"
                       strokeDasharray="251.2"
-                      strokeDashoffset={cashflowSummaryStore.total_income > cashflowSummaryStore.total_expense ? 
-                        (251.2 - (251.2 * (cashflowSummaryStore.total_income/(cashflowSummaryStore.total_income + cashflowSummaryStore.total_expense)*100)) / 100).toFixed(0) :
-                        (251.2 - (251.2 * (cashflowSummaryStore.total_expense/(cashflowSummaryStore.total_income + cashflowSummaryStore.total_expense)*100)) / 100).toFixed(0)
+                      strokeDashoffset={
+                        cashflowSummaryStore.total_income == 0 && cashflowSummaryStore.total_expense == 0 
+                        ? (251.2 - (251.2 * 0) / 100)
+                        : cashflowSummaryStore.total_income > cashflowSummaryStore.total_expense
+                        ? (251.2 - (251.2 * (cashflowSummaryStore.total_income/(cashflowSummaryStore.total_income + cashflowSummaryStore.total_expense)*100)) / 100).toFixed(0) 
+                        : (251.2 - (251.2 * (cashflowSummaryStore.total_expense/(cashflowSummaryStore.total_income + cashflowSummaryStore.total_expense)*100)) / 100).toFixed(0)
                       }
                       transform="rotate(-90 50 50)"
                     />
@@ -300,9 +356,13 @@ const Dashboard = () => {
                       fontSize="17"
                       fontWeight="bold"
                     >
-                      {cashflowSummaryStore.total_income > cashflowSummaryStore.total_expense ? 
-                      (cashflowSummaryStore.total_income/(cashflowSummaryStore.total_income + cashflowSummaryStore.total_expense)*100).toFixed(0) :
-                      (cashflowSummaryStore.total_expense/(cashflowSummaryStore.total_income + cashflowSummaryStore.total_expense)*100).toFixed(0)}%
+                      {
+                        cashflowSummaryStore.total_expense == 0 && cashflowSummaryStore.total_income == 0
+                        ? 0
+                        : cashflowSummaryStore.total_income > cashflowSummaryStore.total_expense 
+                        ? (cashflowSummaryStore.total_income/(cashflowSummaryStore.total_income + cashflowSummaryStore.total_expense)*100).toFixed(0)
+                        : (cashflowSummaryStore.total_expense/(cashflowSummaryStore.total_income + cashflowSummaryStore.total_expense)*100).toFixed(0)
+                      }%
                     </text>
                     <text
                       x="50%"
@@ -313,7 +373,13 @@ const Dashboard = () => {
                       fontSize="10"
                       fontWeight="bold"
                     >
-                      {cashflowSummaryStore.total_income > cashflowSummaryStore.total_expense ? 'Pemasukan' : 'Pengeluaran'}
+                      {
+                        cashflowSummaryStore.total_income == 0 && cashflowSummaryStore.total_expense == 0
+                        ? '-'
+                        : cashflowSummaryStore.total_income > cashflowSummaryStore.total_expense 
+                        ? 'Pemasukan' 
+                        : 'Pengeluaran'
+                      }
                     </text>
                   </svg>
                 </div>
@@ -484,57 +550,67 @@ const Dashboard = () => {
                 </div>
 
                 <div className="rounded-md border">
-                  <Table className="outline">
-                    <TableHeader className="bg-yellow-100">
+                  <Table className="border border-[#DDDDDD]">
+                    <TableHeader className="bg-[#FFD451]">
                       <TableRow>
-                        <TableHead className="font-medium text-gray-600">
+                        <TableHead className="font-medium text-black border border-[#DDDDDD]">
                           Tanggal dan Waktu
                         </TableHead>
-                        <TableHead className="font-medium text-gray-600">
+                        <TableHead className="font-medium text-black border border-[#DDDDDD]">
                           Type
                         </TableHead>
-                        <TableHead className="font-medium text-gray-600">
+                        <TableHead className="font-medium text-black border border-[#DDDDDD]">
                           Kategori
                         </TableHead>
-                        <TableHead className="font-medium text-gray-600">
+                        <TableHead className="font-medium text-black border border-[#DDDDDD]">
                           Dari
                         </TableHead>
-                        <TableHead className="font-medium text-gray-600">
+                        <TableHead className="font-medium text-black border border-[#DDDDDD]">
                           Untuk
                         </TableHead>
-                        <TableHead className="font-medium text-gray-600">
+                        <TableHead className="font-medium text-black border border-[#DDDDDD]">
                           Catatan
                         </TableHead>
-                        <TableHead className="font-medium text-gray-600">
+                        <TableHead className="font-medium text-black border border-[#DDDDDD]">
                           Nominal
                         </TableHead>
                       </TableRow>
                     </TableHeader>
-                    <TableBody>
-                      {currentTransactions.length > 0 ? (
-                        currentTransactions.map((item) => (
-                          <TableRow key={item.id} className="hover:bg-gray-50">
-                            <TableCell className="text-xs">
-                              {item.date}
+                    <TableBody className="border border-[#DDDDDD]">
+                      {allTransactionsStore?.data?.transactions?.length > 0 ? (
+                        allTransactionsStore.data.transactions.map((item) => (
+                          <TableRow key={item.id} className="hover:bg-gray-50 border border-[#DDDDDD]">
+                            <TableCell className="text-xs border border-[#DDDDDD]">
+                              {formatDate(item.created_at.toString())}
                             </TableCell>
-                            <TableCell className="text-xs">
-                              {item.type}
+                            <TableCell className="text-xs border border-[#DDDDDD]">
+                              {item.transaction_type}
                             </TableCell>
-                            <TableCell className="text-xs">
-                              {item.kategori}
+                            <TableCell className="text-xs border border-[#DDDDDD]">
+                              {item.transfer_category ? item.transfer_category : ""}
                             </TableCell>
-                            <TableCell className="text-xs">
-                              {item.dari}
+                            <TableCell className="text-xs border border-[#DDDDDD]">
+                              {item.sender_full_name ? item.sender_full_name : ""}
                             </TableCell>
-                            <TableCell className="text-xs">
-                              {item.untuk}
+                            <TableCell className="text-xs border border-[#DDDDDD]">
+                              {item.recipient_full_name ? item.recipient_full_name : ""}
                             </TableCell>
-                            <TableCell className="text-xs">
-                              {item.catatan}
+                            <TableCell className="text-xs border border-[#DDDDDD]">
+                              {item.notes}
                             </TableCell>
-                            <TableCell className="text-xs font-medium text-red-500">
-                              {item.nominal}
-                            </TableCell>
+                            {
+                              item.transaction_type.toLowerCase() == 'topup'
+                              ? <>
+                                  <TableCell className="text-xs font-medium text-black border border-[#DDDDDD]">
+                                    + Rp {item.amount.toLocaleString('id-ID')},00
+                                  </TableCell>
+                                </>
+                              : <>
+                                  <TableCell className="text-xs font-medium text-[#EF4444] border border-[#DDDDDD]">
+                                    - Rp {item.amount.toLocaleString('id-ID')},00
+                                  </TableCell>
+                                </>
+                            }
                           </TableRow>
                         ))
                       ) : (
