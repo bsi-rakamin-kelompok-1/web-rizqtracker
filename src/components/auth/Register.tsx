@@ -19,10 +19,11 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { PasswordInput } from "./PasswordInput";
+import { useAuthDataStore } from "@/store/AuthDataStore";
 
 const Register = () => {
   const[isLoading, setIsLoading] = useState<boolean>(false);
-
+  const authStore = useAuthDataStore();
   const router = useRouter();
 
   const[formData, setFormData] = useState({
@@ -33,8 +34,20 @@ const Register = () => {
     confirm_password: ""
   })
 
+  const[loginData, setLoginData] = useState({
+    email: "",
+    password: "",
+  })
+
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
+    if (e.target.id === 'email' || e.target.id === 'password') {
+      setLoginData(prevLoginData => ({
+        ...prevLoginData,
+        [e.target.id]: e.target.value
+      }));
+    }
   };
 
   const [errors, setErrors] = useState<Partial<typeof formData>>({});
@@ -46,10 +59,13 @@ const Register = () => {
     try {
       setIsLoading(true);
       const res = await axios.post("https://kelompok1.serverku.org/v1/auth/register", formData);
-
+   
+      const resLogin = await axios.post("https://kelompok1.serverku.org/v1/auth/login", loginData);
+      authStore.setToken(resLogin.data.token);
       toast.success("Akun berhasil didaftarkan.");
+
       
-      router.push("/auth/login");
+      router.push("/auth/pin");
     } catch (err: any) {
       setIsLoading(false);
 

@@ -35,7 +35,7 @@ const Topup = () => {
     topup_method: "",
     amount: "",
     notes: "",
-    pin: "222222",
+    pin: "123456",
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,9 +125,9 @@ const Topup = () => {
                     <SelectValue placeholder="Pilih sumber dana" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Kebutuhan">Bank Transfer</SelectItem>
-                    <SelectItem value="Pembayaran">Kartu Debit</SelectItem>
-                    <SelectItem value="Belanja">Kartu Kredit</SelectItem>
+                    <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                    <SelectItem value="debit_card">Kartu Debit</SelectItem>
+                    <SelectItem value="credit_card">Kartu Kredit</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
