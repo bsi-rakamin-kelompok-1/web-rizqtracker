@@ -32,7 +32,8 @@ function Navbar() {
     localStorage.removeItem('transaction-history-store');
     localStorage.removeItem('transaction-type-store');
     localStorage.removeItem('user-store');
-    
+    document.cookie = `isLoggedIn=; path=/; SameSite=Lax;`;
+
     router.push('/auth/login');
   }
 

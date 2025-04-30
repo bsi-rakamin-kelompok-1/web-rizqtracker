@@ -49,6 +49,12 @@ import { useTransactionTypeStore } from "@/store/TransactionTypeStore";
 
 const Dashboard = () => {
   const token = useAuthDataStore((state) => state.token);
+  useEffect(() => {
+    if (!token) {
+      router.replace("/auth/login");
+    }
+  }, [token]);
+
   const router = useRouter();
   const userStore = useUserStore();
   const cashflowSummaryStore = useCashflowSummaryStore();
@@ -667,10 +673,10 @@ const Dashboard = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
-                          <DropdownMenuItem onClick={() => { setSortBy('date'); setSortType('desc'); }}>
+                          <DropdownMenuItem onClick={() => { setSortBy('createdAt'); setSortType('desc'); }}>
                             Terbaru
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => { setSortBy('date'); setSortType('asc'); }}>
+                          <DropdownMenuItem onClick={() => { setSortBy('createdAt'); setSortType('asc'); }}>
                             Terlama
                           </DropdownMenuItem>
                         </DropdownMenuContent>
