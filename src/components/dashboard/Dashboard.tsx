@@ -57,34 +57,19 @@ const Dashboard = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const [sortBy, setSortBy] = useState('amount');
+  const [sortType, setSortType] = useState('asc');
+  const [transactionType, setTransactionType] = useState('');
+  const [transferCategory, setTransferCategory] = useState('');
+  const [topupMethod, setTopupMethod] = useState('');
+  const [pageSize, setPageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
 
   const [activeTrxTab, setActiveTrxTab] = useState("income");
 
   const [periodState, setPeriodState] = useState("week");
 
-  const transactions = [
-    {
-      id: 1,
-      date: "19-01-2024",
-      type: "Transfer",
-      kategori: "Bank Transfer",
-      dari: "Aldin",
-      untuk: "Rihlan",
-      catatan: "Tagihan 1401",
-      nominal: "Rp.500.000,00",
-    },
-    {
-      id: 2,
-      date: "20-02-2024",
-      type: "Top Up",
-      kategori: "Kartu Kredit",
-      dari: "",
-      untuk: "Rihlan",
-      catatan: "Source Found",
-      nominal: "Rp.100.000,00",
-    },
-  ];
+  
 
   const getUserDetail = async () => {
     try {
@@ -181,17 +166,6 @@ const Dashboard = () => {
     return `${hours}.${minutes} - ${day} ${month} ${year}`;
   }
 
-  const filteredTransactions = allTransactionsStore.data.transactions.filter(
-    (item) =>
-      Object.values(item).some((val) =>
-        val?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-      )
-  );
-
-  const totalPages = Math.ceil(
-    filteredTransactions.length / allTransactionsStore.meta.size
-  );
-
   const handleTransferClick = () => {
     router.push("/transactions/transfer");
   };
@@ -242,6 +216,47 @@ const Dashboard = () => {
   useEffect(() => {
     getCashflowSummary();
   }, [periodState]);
+
+  useEffect(() => {
+    const searchTransaction = async () => {
+      try {
+        const params = new URLSearchParams({
+          page: currentPage.toString(),
+          size: pageSize.toString(),
+          sort_by: sortBy,
+          sort_type: sortType,
+          search: searchTerm,
+        });
+
+        if (transactionType) params.append('transaction_type', transactionType);
+        if (transferCategory) params.append('transfer_category', transferCategory);
+        if (topupMethod) params.append('topup_method', topupMethod);
+
+        const resp = await axios.get(
+          `https://kelompok1.serverku.org/v1/transactions?${params.toString()}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        allTransactionsStore.setAllTransactions({
+          meta: resp.data.meta,
+          data: {
+            transactions: resp.data.data,
+          },
+        });
+
+        setPageSize(resp.data.meta.size)
+        setTotalPages(resp.data.meta.total_page)
+      } catch(error) {
+        console.error('Error:', error);
+      }
+    }
+
+    searchTransaction();
+  }, [searchTerm, sortBy, sortType, transactionType, transferCategory, topupMethod, currentPage, pageSize])
 
   return (
     <>
@@ -615,7 +630,10 @@ const Dashboard = () => {
                         placeholder="Cari transaksi/nomor..."
                         className="pl-10"
                         value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onChange={(e) => {
+                          setSearchTerm(e.target.value);
+                          setCurrentPage(1);
+                        }}
                       />
                     </div>
 
@@ -649,8 +667,12 @@ const Dashboard = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
-                          <DropdownMenuItem>Terbaru</DropdownMenuItem>
-                          <DropdownMenuItem>Terlama</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => { setSortBy('date'); setSortType('desc'); }}>
+                            Terbaru
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => { setSortBy('date'); setSortType('asc'); }}>
+                            Terlama
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
 
@@ -665,8 +687,12 @@ const Dashboard = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
-                          <DropdownMenuItem>Tertinggi</DropdownMenuItem>
-                          <DropdownMenuItem>Terendah</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => { setSortBy('amount'); setSortType('desc'); }}>
+                            Tertinggi
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => { setSortBy('amount'); setSortType('asc'); }}>
+                            Terendah
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
