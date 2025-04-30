@@ -255,7 +255,7 @@ const Dashboard = () => {
         });
 
         setPageSize(resp.data.meta.size)
-        setTotalPages(resp.data.meta.total_page)
+        setTotalPages(resp.data.meta.total_pages)
       } catch(error) {
         console.error('Error:', error);
       }

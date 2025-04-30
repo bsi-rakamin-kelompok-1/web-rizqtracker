@@ -45,7 +45,7 @@ const Login = () => {
       const res = await axios.post("https://kelompok1.serverku.org/v1/auth/login", formData);
 
       authStore.setToken(res.data.token);
-      document.cookie = `isLoggedIn=true; path=/; SameSite=Lax;`;
+      document.cookie = `isLoggedIn=true; SameSite=Lax;`
 
       router.push("/dashboard")
     } catch (err: any) {
