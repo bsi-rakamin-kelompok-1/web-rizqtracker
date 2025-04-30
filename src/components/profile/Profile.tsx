@@ -109,7 +109,7 @@ const Profile = () => {
                 <div>
                   <Label htmlFor="nama">Nama Lengkap</Label>
                   <Input
-                    id="nama"
+                    id="full_name"
                     value={formData.full_name}
                     onChange={handleChange}
                     placeholder="Nama Lengkap"
@@ -117,18 +117,19 @@ const Profile = () => {
                 </div>
                 <div>
                   <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    value={userStore.email} // Email tetap dari userStore karena tidak ada di formData untuk diubah
-                    placeholder="Email"
-                    type="email"
-                    readOnly // Asumsi email tidak bisa diubah
-                  />
+                  <p className="text-gray-700">{userStore.email}</p>
                 </div>
                 <div>
                   <Label htmlFor="phone">Nomor HP</Label>
                   <div className="rounded-md border border-gray-300 p-2">
-                    <p className="text-gray-700">{formData.phone_number}</p>
+                    {/* <p className="text-gray-700">{formData.phone_number}</p> */}
+                    <Input
+                    id="phone_number"
+                    value={formData.phone_number} // Email tetap dari userStore karena tidak ada di formData untuk diubah
+                    placeholder="No HP"
+                    onChange={handleChange}
+
+                  />
                   </div>
                 </div>
                 <div>

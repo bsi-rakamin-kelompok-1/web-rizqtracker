@@ -26,6 +26,9 @@ import Link from "next/link";
 import { useAuthDataStore } from "@/store/AuthDataStore";
 import { useUserStore } from "@/store/UserStore";
 import axios from "axios";
+import toast from "react-hot-toast";
+import { useTransferNoPinStore } from "@/store/TransferNoPinStore";
+
 
 const dummyUsers = {
   id: "fa8f23af-b469-4062-87e3-08cefa90cf11",
@@ -48,6 +51,9 @@ const Transfer = () => {
   const [accountNumber, setAccountNumber] = useState("");
   const [accountExists, setAccountExists] = useState<boolean | null>(null);
   const [error, setError] = useState("");
+  const[isLoading, setIsLoading] = useState<boolean>(false);
+  const transfernopinStore = useTransferNoPinStore();
+
 
   const [formData, setFormData] = useState({
     recipient_account_number: "",
@@ -57,8 +63,23 @@ const Transfer = () => {
     notes: "",
   });
 
-  const handleInputChange = (event) => {
-    setAccountNumber(event.target.value);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    if (id === 'accountNumber') {
+      setAccountNumber(value); // Hanya perbarui accountNumber state
+    } else {
+      setFormData(prevFormData => ({
+        ...prevFormData,
+        [id]: value
+      }));
+    }
+  };
+
+  const handleTransferCategoryChange = (value: string) => {
+    setFormData(prevData => ({
+      ...prevData,
+      transfer_category: value,
+    }));
   };
 
   const getUserDetail = async () => {
@@ -81,6 +102,11 @@ const Transfer = () => {
   const checkAccount = async () => {
     setError("");
     setAccountExists(null); 
+    setFormData(prevFormData => ({
+        ...prevFormData,
+        recipient_account_number: accountNumber, // Salin accountNumber ke formData
+      }));
+    
     try {
       const resp = await axios.get(
         `https://kelompok1.serverku.org/v1/accounts/${accountNumber}`,
@@ -99,10 +125,54 @@ const Transfer = () => {
       console.error("Error: ", error);
     }
   };
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const [errors, setErrors] = useState<Partial<typeof formData>>({});
+
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+
+    try {
+      setIsLoading(true);
+     
+
+      //toast.success("Transfer Berhasil.");
+      transfernopinStore.setTransferNoPin(formData);
+      router.push("/auth/confirm-pin-transfer");
+    } catch (err: any) {
+      setIsLoading(false);
+
+      const errorData = err.response?.data;
+
+      if(errorData?.errors && Array.isArray(errorData?.errors)) {
+        const fieldErrors: Partial<typeof formData> = {};
+
+      }
+      else if (errorData?.message) {
+        toast.error(errorData.message);
+      } 
+      else {
+        toast.error("Something went wrong!");
+      }
+
+      console.error("Topup error:", errorData || err.message);
+    }
+    finally {
+      setIsLoading(false);
+    }
+  };
   useEffect(() => {
     getUserDetail();
     checkAccount();
   }, []);
+
+  useEffect(() => {
+    console.log("FORM DATA: ", formData)
+  }, [handleChange]);
 
   return (
     <>
@@ -142,30 +212,33 @@ const Transfer = () => {
                 )}
                 {error && <p className="text-orange-500">{error}</p>}
               </div>
-
+              <form onSubmit={handleSubmit}> 
               <div className="space-y-1">
                 <Label>Nominal</Label>
                 <div className="flex flex-col">
                   <Input
-                    type="text"
+                  id="amount" 
                     placeholder="Isi Nominal"
                     className="w-full"
+                    onChange={handleChange} 
+                    value={formData.amount} 
                   />
+                  
                   <p className="text-xs text-gray-500 mt-1">
                     Saldo: {userStore.account.balance}
                   </p>
                 </div>
                 <div className="">
-                  <Select>
+                  <Select onValueChange={handleTransferCategoryChange} value={formData.transfer_category}>
                     <SelectTrigger className="mt-2 w-full">
                       <SelectValue placeholder="Pilih kategori transfer" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Kebutuhan">Kebutuhan</SelectItem>
-                      <SelectItem value="Pembayaran">Pembayaran</SelectItem>
-                      <SelectItem value="Belanja">Belanja</SelectItem>
-                      <SelectItem value="Transportasi">Transportasi</SelectItem>
-                      <SelectItem value="Transfer Kekayaan">
+                      <SelectItem value="needs">Kebutuhan</SelectItem>
+                      <SelectItem value="bills">Pembayaran</SelectItem>
+                      <SelectItem value="shopping">Belanja</SelectItem>
+                      <SelectItem value="transport">Transportasi</SelectItem>
+                      <SelectItem value="transfer_of_wealth">
                         Transfer Kekayaan
                       </SelectItem>
                     </SelectContent>
@@ -175,18 +248,23 @@ const Transfer = () => {
 
               <div className="space-y-1">
                 <Label>Catatan</Label>
-                <Input placeholder="Catatan.." />
+                <Input id= "notes" 
+                placeholder="Catatan.."
+                 onChange={handleChange} 
+                value={formData.notes} 
+                 />
               </div>
               <div className="flex justify-center">
-                <Button className="w-2xs mt-4 bg-[#32BAA3]">
-                  <Link
+                <Button type="submit" className="w-2xs mt-4 bg-[#32BAA3]">
+                  {/* <Link
                     href="/transactions/receipt"
                     className="hover: font-bold text-brand text-sm ml-1"
                   >
                     Transfer
-                  </Link>
+                  </Link> */}
                 </Button>
               </div>
+              </form>
             </CardContent>
           </Card>
         </div>

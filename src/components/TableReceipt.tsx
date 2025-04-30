@@ -2,25 +2,12 @@
 
 
 import { useRouter } from "next/navigation";
+import { useReceiptTopupStore } from "@/store/ReceiptTopupStore";
 
 
 
-type Transacstion = {
-  id: BigInteger
-  amount: BigInteger
-  name: string
-  typeTransaction: string
-  categoryTransfer: string
-  referenceNumber: string
-  note: string
-}
-
-interface DataTableProps {
-  data: Transacstion[]
-}
-
-function TableReceipt({ data }: DataTableProps) {
-  
+function TableReceipt() {
+  const receiptTopupStore = useReceiptTopupStore();
   
 
   return (
@@ -29,12 +16,12 @@ function TableReceipt({ data }: DataTableProps) {
        
         <div className="flex flex-row justify-between ">
           <div>
-            <p className="mb-5">Nominal</p>
-            <p className="mb-5">Nama Penerima</p>
             <p className="mb-5">Tipe Transaksi</p>
-            <p className="mb-5">Kategori Transfer</p>
-            <p className="mb-5">Nomor Referensi</p>
+            <p className="mb-5">Metode Top up</p>
+            <p className="mb-5">Nominal</p>
             <p className="mb-5">Catatan</p>
+            <p className="mb-5">Nomor Referensi</p>
+            
 
           </div>
           <div>
@@ -51,9 +38,24 @@ function TableReceipt({ data }: DataTableProps) {
             </TableRow>
   
         ))} */}
-        {Object.entries(data).filter(([key]) => key !== "id").map(([key, value]) => (
+        {/* {Object.entries(data).filter(([key]) => key !== "id" ).filter(([key]) => key !== "setReceiptTopup").filter(([key]) => key !== "created_at").filter(([key]) => key !== "transaction_type").map(([key, value]) => (
           <p key={key} className="mb-5">{String(value)}</p>
-        ))}
+        ))} */}
+            <div className="mb-5">
+              {receiptTopupStore.transaction_type === 'topup' ? 'Top Up' : 'Transfer'}
+            </div>
+            <div className="mb-5">
+              {receiptTopupStore.topup_method === 'credit_card' ? 'Kartu Kredit' : receiptTopupStore.topup_method === 'debit_card' ? 'Kartu Debit' : 'Transfer Bank'}
+            </div>
+            <div className="mb-5">
+              {receiptTopupStore.amount.toString()}
+            </div>
+            <div className="mb-5">
+              {receiptTopupStore.notes}
+            </div>
+            <div className="mb-5">
+              {receiptTopupStore.reference_number}
+            </div>
           </div>
         </div>
     </>
