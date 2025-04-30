@@ -1,5 +1,11 @@
-export default function Page() {
+import Dashboard from "@/components/dashboard/Dashboard";
+import Navbar from "@/components/Navbar";
+import { FC } from "react";
+
+const Page: FC = () => {
   return (
-    <h1>Hello Next.js!</h1>
+    <Dashboard></Dashboard>
   );
-}
+};
+  
+  export default Page;
