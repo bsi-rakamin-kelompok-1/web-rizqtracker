@@ -24,6 +24,18 @@ function Navbar() {
   const handleProfileClick = () => {
     router.push('/profile');
   };
+  const handleLogOut = () => {
+    localStorage.removeItem('auth-store');
+    localStorage.removeItem('all-transactions-store');
+    localStorage.removeItem('cashflow-store');
+    localStorage.removeItem('expense-history-store');
+    localStorage.removeItem('transaction-history-store');
+    localStorage.removeItem('transaction-type-store');
+    localStorage.removeItem('user-store');
+    document.cookie = `isLoggedIn=; SameSite=Lax;`;
+
+    router.push('/auth/login');
+  }
 
   return (
     <header className="bg-[#32BAA3]">
@@ -74,6 +86,7 @@ function Navbar() {
                   <a
                     className="text-white transition hover:text-gray-500/75"
                     href="#"
+                    onClick={handleLogOut}
                   >
                     Keluar
                   </a>

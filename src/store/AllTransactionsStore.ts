@@ -22,7 +22,7 @@ type Transaction = {
     amount: number,
     notes: string,
     reference_number: string,
-    "created_at": Date
+    created_at: Date
 }
 
 type Data = {

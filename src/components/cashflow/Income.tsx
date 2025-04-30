@@ -1,3 +1,5 @@
+"use client"
+
 import {
     Card,
     CardContent,
@@ -12,16 +14,21 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-  } from "@/components/ui/select";
+  } from "@/components/ui/Select";
   import { Button } from "@/components/ui/Button";
   import { Label } from "@/components/ui/Label";
   import { Input } from "@/components/ui/Input";
   import { ArrowLeft } from "lucide-react";
   import Navbar from "@/components/Navbar";
   import IncomeCard from "@/components/cashflow/IncomeCard";
+  import { useRouter } from "next/navigation";
   
 const Income = () =>{
-    
+    const router = useRouter();
+
+    const handleBackToDashboard= () => {
+      router.push("/dashboard");
+    };
   
   
     return (
@@ -30,7 +37,7 @@ const Income = () =>{
         <div className=" bg-gradient-to-b min-h-screen from-[#32BAA3] to-[#FFFFFF]">
             <div className="flex justify-center p-5">
                 <div className="w-full max-w-4xl">
-                    <ArrowLeft className="cursor-pointer text-white " />
+                    <ArrowLeft className="cursor-pointer text-white" onClick={handleBackToDashboard} />
                     <div className="flex flex-row justify-center">
                         <h2 className="text-xl text-white font-bold">Detail Pemasukan</h2>
                     </div>

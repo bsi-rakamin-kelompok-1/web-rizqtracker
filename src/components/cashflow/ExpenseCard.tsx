@@ -1,124 +1,137 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/Button"
-import { Card, CardContent } from "@/components/ui/Card"
-import { format, isThisWeek, isThisMonth, subMonths, isWithinInterval, isThisYear } from "date-fns"
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent } from "@/components/ui/Card";
+import {
+  format,
+  isThisWeek,
+  isThisMonth,
+  subMonths,
+  isWithinInterval,
+  isThisYear,
+} from "date-fns";
+import axios from "axios";
+import { useAuthDataStore } from "@/store/AuthDataStore";
+import { useExpenseHistoryStore } from "@/store/ExpenseHistoryStore";
+import { useTransactionTypeStore } from "@/store/TransactionTypeStore";
 
-const dummyTransactions = [
-    {
-      id: 1,
-      type: "Transfer",
-      from: "Joe Shakira",
-      category: "Split Bill",
-      amount: 25000,
-      date: new Date("2025-04-10T15:01:40"),
-    },
-    {
-      id: 2,
-      type: "Transfer",
-      from: "Joe Shakira",
-      category: "Split Bill",
-      amount: 25000,
-      date: new Date("2025-04-20T14:32:20"),
-    },
-    {
-      id: 3,
-      type: "Transfer",
-      from: "Joe Shakira",
-      category: "Split Bill",
-      amount: 25000,
-      date: new Date("2025-04-20T09:05:10"),
-    },
-    {
-      id: 4,
-      type: "Transfer",
-      from: "Joe Shakira",
-      category: "Split Bill",
-      amount: 25000,
-      date: new Date("2025-03-20T11:10:05"),
-    },
-    {
-      id: 5,
-      type: "Transfer",
-      from: "Joe Shakira",
-      category: "Split Bill",
-      amount: 25000,
-      date: new Date("2025-02-15T08:25:30"),
-    },
-    {
-      id: 6,
-      type: "Transfer",
-      from: "Joe Shakira",
-      category: "Split Bill",
-      amount: 25000,
-      date: new Date("2024-11-10T10:00:00"),
-    },
-    {
-        id: 7,
-        type: "Transfer",
-        from: "Joe Shakira",
-        category: "Split Bill",
-        amount: 25000,
-        date: new Date("2025-04-22T10:00:00"),
-      },
-  ]
+const ExpenseCard = () => {
+  const expenseHistoryStore = useExpenseHistoryStore();
+  const transactionType = useTransactionTypeStore((state) => state.type);
+  const token = useAuthDataStore((state) => state.token);
 
-const filters = ["Minggu Ini", "Bulan Ini", "3 Bulan", "Tahun Ini"]
+  const getExpenseHistory = async () => {
+    try {
+      const resp = await axios.get(
+        "https://kelompok1.serverku.org/v1/cashflow/expense",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-function ExpenseCard() {
-  const [selectedFilter, setSelectedFilter] = useState("Minggu Ini")
+      expenseHistoryStore.setExpenseHistory(resp.data.expense_details);
+    } catch (error) {
+      console.error("Error: ", error);
+    }
+  };
 
-  const filteredTransactions = dummyTransactions.filter((tx) => {
-    const now = new Date()
+  const filters = ["Minggu Ini", "Bulan Ini", "3 Bulan"];
+
+  const [selectedFilter, setSelectedFilter] = useState("Minggu Ini");
+
+  const transactions =
+    transactionType === "needs"
+      ? expenseHistoryStore.needs
+      : transactionType === "bills"
+      ? expenseHistoryStore.bills
+      : transactionType === "shopping"
+      ? expenseHistoryStore.shopping
+      : transactionType === "transport"
+      ? expenseHistoryStore.transport
+      : expenseHistoryStore.transfer_of_wealth;
+
+  const filteredTransactions = transactions.filter((tx) => {
+    const now = new Date();
     switch (selectedFilter) {
       case "Minggu Ini":
-        return isThisWeek(tx.date, { weekStartsOn: 1 })
+        return isThisWeek(tx.created_at, { weekStartsOn: 1 });
       case "Bulan Ini":
-        return isThisMonth(tx.date)
+        return isThisMonth(tx.created_at);
       case "3 Bulan":
-        return isWithinInterval(tx.date, {
+        return isWithinInterval(tx.created_at, {
           start: subMonths(now, 3),
           end: now,
-        })
+        });
       case "Tahun Ini":
-        return isThisYear(tx.date)
+        return isThisYear(tx.created_at);
       default:
-        return true
+        return true;
     }
-  })
+  });
+
+  useEffect(() => {
+    getExpenseHistory();
+  }, []);
 
   return (
     <div className="p-4">
-      <div className="flex justify-center gap-2 mb-6">
-        {filters.map((filter) => (
-          <Button
-            key={filter}
-            className={
-              selectedFilter === filter ? "bg-yellow-400 text-black" : ""
-            }
-            variant={selectedFilter === filter ? "default" : "outline"}
-            onClick={() => setSelectedFilter(filter)}
-          >
-            {filter}
-          </Button>
-        ))}
+      <div className="flex justify-center mb-6">
+        <div className="flex rounded-md overflow-hidden border border-gray-300 bg-white">
+          {filters.map((filter, index) => (
+            <Button
+              key={filter}
+              className={`px-4 py-2 text-sm font-medium ${
+                selectedFilter === filter
+                  ? "bg-yellow-400 text-black"
+                  : "bg-white text-black"
+              } ${index !== filters.length ? "hover:bg-yellow-500 w-30" : ""}`}
+              onClick={() => setSelectedFilter(filter)}
+              variant="ghost"
+            >
+              {filter}
+            </Button>
+          ))}
+        </div>
       </div>
 
       <div className="space-y-4">
         {filteredTransactions.map((tx) => (
-          <Card key={tx.id} className="flex items-center justify-between p-4">
-            <CardContent className="p-0 flex flex-col sm:flex-row justify-between w-full">
-              <div className="space-y-1">
-                <p className="font-medium text-primary">{tx.type}</p>
-                <p className="text-sm text-muted-foreground">
-                  {format(tx.date, "dd MMMM yyyy - HH:mm:ss")}<br />
-                  Transfer dari <span className="font-bold">{tx.from}</span>
+          <Card
+            key={tx.transaction_id}
+            className="flex items-center justify-between p-4"
+          >
+            <CardContent className="p-1 flex flex-col sm:flex-row justify-between w-full items-center">
+              <div>
+                <p className="font-medium text-[#EF4444]">
+                  {transactionType === "needs"
+                    ? "Kebutuhan"
+                    : transactionType === "bills"
+                    ? "Pembayaran"
+                    : transactionType === "shopping"
+                    ? "Belanja"
+                    : transactionType === "transport"
+                    ? "Transportasi"
+                    : "Kesehatan"}
                 </p>
               </div>
-              <div className="flex flex-col items-end justify-between">
-                <p className="text-sm text-right">{tx.category}</p>
-                <p className="text-lg font-bold text-green-700">
+              <div>
+                <p className="text-sm text-left">
+                  {format(tx.created_at, "dd MMMM yyyy")}
+                  <br />
+                  Transfer Ke{" "}
+                  <span className="font-bold">
+                    {tx.recipient_account_number}
+                  </span>
+                </p>
+              </div>
+              <div>
+                <p className="text-sm">{tx.notes}</p>
+              </div>
+              <div>
+                <p className="text-lg font-bold text-[#000000]">
                   Rp {tx.amount.toLocaleString("id-ID")},00
                 </p>
               </div>
@@ -127,7 +140,7 @@ function ExpenseCard() {
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default ExpenseCard;
