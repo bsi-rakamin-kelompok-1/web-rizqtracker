@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react";
 import Image from "next/image";
-import walledLogo from "@/assets/Logo.png";
+import walledLogo from "../../publicLogo.png";
 import { useAuthDataStore } from "@/store/AuthDataStore";
 import { useUserStore } from "@/store/UserStore";
 import { useRouter } from "next/navigation";
@@ -103,7 +103,7 @@ function Navbar() {
               >
                 <span className="sr-only">Toggle dashboard menu</span>
                 <img
-                  src={userStore.avatar_url ?? "@/assets/Logo.png"}
+                  src={userStore.avatar_url ?? "../../publicLogo.png"}
                   alt=""
                   className="size-10 object-cover"
                 />

@@ -11,8 +11,8 @@ import {
 } from "../ui/Card";
 import { Input } from "../ui/Input";
 import { Label } from "../ui/Label";
-import Logo from "@/assets/Logo.png";
-import HandImg from "@/assets/Hand.png";
+import Logo from "../../publicLogo.png";
+import HandImg from "../../publicHand.png";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import axios from "axios";

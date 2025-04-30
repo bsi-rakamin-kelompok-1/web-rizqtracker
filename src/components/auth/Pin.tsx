@@ -14,7 +14,7 @@ import { Label } from "../ui/Label";
 import { Input } from "../ui/Input";
 import { Button } from "../ui/Button";
 import Image from "next/image";
-import Logo from "@/assets/Logo.png";
+import Logo from "../../publicLogo.png";
 import { useState } from "react";
 import { PasswordInput } from "./PasswordInput";
 import { useAuthDataStore } from "@/store/AuthDataStore";

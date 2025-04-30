@@ -14,7 +14,7 @@ import { Label } from "../ui/Label";
 import { Input } from "../ui/Input";
 import { Button } from "../ui/Button";
 import Image from "next/image";
-import Logo from "@/assets/Logo.png";
+import Logo from "../../publicLogo.png";
 import { useState } from "react";
 import { PasswordInput } from "./PasswordInput";
 import { useAuthDataStore } from "@/store/AuthDataStore";
@@ -56,7 +56,7 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen w-full bg-green bg-[url(@/assets/LoginWallpaper.png)] bg-cover bg-center bg-no-repeat flex items-center justify-center">
+    <div className="min-h-screen w-full bg-green bg-[url(../../publicLoginWallpaper.png)] bg-cover bg-center bg-no-repeat flex items-center justify-center">
       <div className="mx-auto container flex w-full flex-col justify-center space-y-6 sm:w-[400px]">
         <div className="flex flex-col">
           <div className="flex justify-center mb-10">
