@@ -75,8 +75,6 @@ const Dashboard = () => {
 
   const [periodState, setPeriodState] = useState("week");
 
-  
-
   const getUserDetail = async () => {
     try {
       const resp = await axios.get(

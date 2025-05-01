@@ -14,7 +14,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/Select";
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
 import { Input } from "@/components/ui/Input";
@@ -131,6 +131,9 @@ const Transfer = () => {
 
   const [errors, setErrors] = useState<Partial<typeof formData>>({});
 
+  const handleBack = () => {
+    router.back();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -181,7 +184,7 @@ const Transfer = () => {
         <div className="flex justify-center p-5">
           <Card className="w-full max-w-md">
             <CardContent className="p-5 space-y-3">
-              <ArrowLeft className="cursor-pointer" />
+              <ArrowLeft className="cursor-pointer" onClick={handleBack} />
               <div className="flex items-center justify-center space-x-2">
                 <h2 className="text-xl font-bold">Transfer</h2>
               </div>

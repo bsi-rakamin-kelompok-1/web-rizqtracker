@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { Heading } from "../ui/Heading";
+import Link from 'next/link';
+import { Heading } from '../ui/Heading';
 import {
   Card,
   CardContent,
@@ -9,30 +9,30 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/Card";
-import { Label } from "../ui/Label";
-import { Input } from "../ui/Input";
-import { Button } from "../ui/Button";
-import Image from "next/image";
-import Logo from "../../publicLogo.png";
-import { useState } from "react";
-import { PasswordInput } from "./PasswordInput";
-import { useAuthDataStore } from "@/store/AuthDataStore";
-import axios from "axios";
-import { useRouter } from "next/navigation";
+} from '@/components/ui/Card';
+import { Label } from '../ui/Label';
+import { Input } from '../ui/Input';
+import { Button } from '../ui/Button';
+import Image from 'next/image';
+import { useState } from 'react';
+import { PasswordInput } from './PasswordInput';
+import { useAuthDataStore } from '@/store/AuthDataStore';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 const Login = () => {
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordConfirmation, setPasswordConfirmation] = useState("");
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordConfirmation, setPasswordConfirmation] = useState('');
 
   const router = useRouter();
   const authStore = useAuthDataStore();
 
-  const[formData, setFormData] = useState({
-    email: "",
-    password: ""
-  })
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -42,66 +42,79 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post("https://kelompok1.serverku.org/v1/auth/login", formData);
+      const res = await axios.post(
+        'https://kelompok1.serverku.org/v1/auth/login',
+        formData
+      );
 
       authStore.setToken(res.data.token);
-      document.cookie = `isLoggedIn=true; SameSite=Lax;`
+      document.cookie = `isLoggedIn=true; SameSite=Lax;`;
 
-      router.push("/dashboard")
+      router.push('/dashboard');
     } catch (err: any) {
+      toast.error(err.response?.data.errors[0] || err.response?.data.message || 'Login gagal');
       const errorData = err.response?.data;
 
-      console.error("Registration error:", errorData || err.message);
+      console.error('Registration error:', errorData || err.message);
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen w-full bg-green bg-[url(../../publicLoginWallpaper.png)] bg-cover bg-center bg-no-repeat flex items-center justify-center">
-      <div className="mx-auto container flex w-full flex-col justify-center space-y-6 sm:w-[400px]">
-        <div className="flex flex-col">
-          <div className="flex justify-center mb-10">
-            <Image src={Logo} alt="Logo" className="w-2xs" />
-          </div>
-          <div className="flex items-center space-x-2 justify-center">
-            <Heading
-              className="flex justify-center space-y-3 text-white"
-              title="Masuk ke "
-              description=""
-            />
-            <Heading
-              className="flex justify-center space-y-3 text-gold"
-              title="Dompet Syariah"
-              description=""
+    <div className='min-h-screen w-full bg-green bg-[url(/LoginWallpaper.png)] bg-cover bg-center bg-no-repeat flex items-center justify-center'>
+      <div className='mx-auto container flex w-full flex-col justify-center space-y-6 sm:w-[400px]'>
+        <div className='flex flex-col items-center justify-center'>
+          <div className='flex justify-center mb-10 w-30 h-20'>
+            <Image
+              src={'/Logo.svg'}
+              alt='Logo'
+              className='w-2xs'
+              width={20}
+              height={20}
             />
           </div>
-          <Card className="p-10">
+          <div className='flex items-center space-x-2 justify-center'>
+            <Heading
+              className='flex justify-center space-y-3 text-white'
+              title='Masuk ke '
+              description=''
+            />
+            <Heading
+              className='flex justify-center space-y-3 text-gold'
+              title='Dompet Syariah'
+              description=''
+            />
+          </div>
+          <Card className='p-10'>
             <CardContent>
               <form onSubmit={handleLogin}>
-                <div className="grid w-full items-center gap-4">
-                  <div className="flex flex-col space-y-1.5">
-                    <Label htmlFor="email">Email</Label>
-                    <Input id="email" placeholder="" onChange={handleChange} value={formData.email} />
-                  </div>
-                  <div className="flex flex-col space-y-1.5">
-                  <Label htmlFor="password">Password</Label>
-                    <PasswordInput
-                      id="password"
-                      value={formData.password}
+                <div className='grid w-full items-center gap-4'>
+                  <div className='flex flex-col space-y-1.5'>
+                    <Label htmlFor='email'>Email</Label>
+                    <Input
+                      id='email'
+                      placeholder=''
                       onChange={handleChange}
-                      autoComplete="new-password"
+                      value={formData.email}
                     />
                   </div>
-                  <div className="flex justify-center">
-                    <Button variant="green">Masuk</Button>
+                  <div className='flex flex-col space-y-1.5'>
+                    <Label htmlFor='password'>Password</Label>
+                    <PasswordInput
+                      id='password'
+                      value={formData.password}
+                      onChange={handleChange}
+                      autoComplete='new-password'
+                    />
                   </div>
+                  <Button variant='green' className='cursor-pointer'>Masuk</Button>
                 </div>
               </form>
             </CardContent>
-            <p className="flex justify-center text-sm text-muted-foreground">
+            <p className='flex justify-center text-sm text-muted-foreground'>
               Belum punya akun? Registrasi
               <Link
-                href="/auth/register"
-                className="hover: font-bold text-brand text-sm ml-1"
+                href='/auth/register'
+                className='hover: font-bold text-brand text-sm ml-1'
               >
                 disini
               </Link>

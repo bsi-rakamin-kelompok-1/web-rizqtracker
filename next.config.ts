@@ -2,7 +2,14 @@ import type { NextConfig } from "next";
 
 
 const nextConfig: NextConfig = {
-  /* config options here */
-};
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'kelompok1.serverku.org',
+      }
+    ]
+  }
+}
 
 export default nextConfig;
