@@ -6,15 +6,15 @@ type Account = {
   };
   
   type Data = {
-        id: String,
-        transaction_type: String,
-        sender_account_number: Number,
-        recipient_account_number: Number,
-        transfer_category: String,
-        amount: Number,
-        notes: String,
-        reference_number: String,
-        created_at: String  // changed from string to Date
+        id: string,
+        transaction_type: string,
+        sender_account_number: number,
+        recipient_account_number: number,
+        transfer_category: string,
+        amount: number,
+        notes: string,
+        reference_number: string,
+        created_at: string  // changed from string to Date
   };
 
   interface Store {

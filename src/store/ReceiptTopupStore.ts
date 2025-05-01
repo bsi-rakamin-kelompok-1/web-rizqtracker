@@ -4,13 +4,13 @@ import { persist } from 'zustand/middleware';
 
   
 type ReceiptTopupStore = {
-        id: String,
-        transaction_type: String,
-        sender_account_number: Number,
-        topup_method: String,
-        amount: Number,
-        notes: String,
-        reference_number: String,
+        id: string,
+        transaction_type: string,
+        sender_account_number: number,
+        topup_method: string,
+        amount: number,
+        notes: string,
+        reference_number: string,
         "created_at": Date,  
         setReceiptTopup : (receiptTopup: ReceiptTopupStore) => void
   };

@@ -4,14 +4,14 @@ import { persist } from 'zustand/middleware';
 
   
 type ReceiptTransferStore = {
-        id: String,
-        transaction_type: String,
-        sender_account_number: Number,
-        recipient_account_number: Number,
-        transfer_category: String,
-        amount: Number,
-        notes: String,
-        reference_number: String,
+        id: string,
+        transaction_type: string,
+        sender_account_number: number,
+        recipient_account_number: number,
+        transfer_category: string,
+        amount: number,
+        notes: string,
+        reference_number: string,
         "created_at": Date,  
         setReceiptTransfer : (receiptTransfer: ReceiptTransferStore) => void
   };
