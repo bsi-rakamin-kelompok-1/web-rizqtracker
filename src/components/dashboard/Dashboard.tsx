@@ -283,7 +283,7 @@ const Dashboard = () => {
                   <p className="text-md">Akun Personal</p>
                 </div>
                 <Avatar className="h-15 w-15 border-2 border-white rounded-full overflow-hidden">
-                  <AvatarImage src="/path/to/cat-image.jpg" alt="Profile" />
+                  <AvatarImage src="/cat-wink.png" alt="Profile" />
                   <AvatarFallback>U</AvatarFallback>
                 </Avatar>
               </div>

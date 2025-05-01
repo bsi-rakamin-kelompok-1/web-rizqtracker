@@ -103,7 +103,7 @@ function Navbar() {
               >
                 <span className='sr-only'>Toggle dashboard menu</span>
                 <Image
-                  src={userStore.avatar_url ?? '/Logo.svg'}
+                  src={userStore.avatar_url ?? '/cat-wink.png'}
                   alt=''
                   width={20}
                   height={20}
